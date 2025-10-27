@@ -1,0 +1,201 @@
+-- Работа с таблицами:
+-- 1.	Создай две таблицы:
+-- customers — клиенты (id, имя, email)
+-- orders — заказы (id, сумма, дата, клиент)
+
+-- Требования:
+-- id — первичный ключ (PK)
+-- email — уникальный
+-- связь между orders и customers — внешним ключом (FK)
+
+create table customers
+(
+    id    bigserial primary key,
+    name  varchar(100) not null,
+    email varchar(100) not null unique
+);
+
+create table orders
+(
+    id          bigserial primary key,
+    sum         bigint check (sum > 0),
+    date        timestamp default now(),
+    customer_id bigint references customers (id)
+);
+
+
+-- 2.	Создай две таблицы:
+-- departments (id, название)
+-- employees (id, имя, должность, отдел)
+--
+-- Требования:
+-- Один отдел может иметь много сотрудников.
+-- Если отдел удаляется — сотрудники должны остаться, но без отдела (NULL).
+
+create table department
+(
+    id   bigserial primary key,
+    name text not null
+);
+
+create table employee
+(
+    id            bigserial primary key,
+    name          varchar(100) not null,
+    position      varchar(150) not null,
+    department_id bigint       references department (id) on delete set null
+);
+
+
+-- 3.	Создай две таблицы:
+-- categories (id, name)
+-- products (id, name, price, category_id)
+--
+-- Требования:
+-- Цена не может быть отрицательной (CHECK).
+-- Названия категорий и товаров — обязательные поля.
+
+create table category
+(
+    id   bigserial primary key,
+    name text not null
+);
+
+create table products
+(
+    id          bigserial primary key,
+    name        text   not null,
+    price       int    not null check ( price > 0),
+    category_id bigint references category (id) on delete set null
+
+);
+
+
+-- 4.	Создай 3 таблицы:
+-- customers — покупатели
+-- products — товары
+-- orders — заказы
+--
+-- Связи:
+-- Один клиент → много заказов
+-- Один заказ → много товаров (через таблицу связей order_items)
+
+create table customers
+(
+    id   bigserial primary key,
+    name text not null
+);
+
+create table products
+(
+    id    bigserial primary key,
+    name  text not null,
+    price int check ( price > 0 )
+);
+create table orders
+(
+    id          bigserial primary key,
+    customer_id bigint references customers (id)
+);
+
+create table order_items
+(
+    order_id   bigint references orders (id),
+    product_id bigint references products (id)
+);
+
+-- 5.	Создай таблицы:
+-- students (id, name, group_id)
+-- groups (id, name, faculty_id)
+-- faculties (id, name)
+-- courses (id, name, teacher_id)
+-- teachers (id, name)
+-- student_courses (student_id, course_id, grade)
+--
+-- Требования:
+-- Один студент может учиться на нескольких курсах.
+-- Каждому курсу назначен преподаватель.
+-- Оценка (grade) — от 1 до 5.
+
+
+create table students
+(
+    id       bigserial primary key,
+    name     varchar(150),
+    group_id bigint references groups (id)
+);
+
+create table groups
+(
+    id         bigserial primary key,
+    name       varchar(150),
+    faculty_id bigint references faculties (id)
+);
+
+create table faculties
+(
+    id   bigserial primary key,
+    name varchar(150)
+);
+
+create table courses
+(
+    id         bigserial primary key,
+    name       varchar(150),
+    teacher_id bigint references teachers (id)
+);
+
+create table teachers
+(
+    id   bigserial primary key,
+    name varchar(150)
+);
+
+create table student_course
+(
+    student_id bigint references students (id),
+    course_id  bigint references courses (id),
+    grade      smallint check ( grade >= 1 and grade <= 5 )
+);
+
+-- 6.	Создай таблицы:
+-- users (id, name, email, created_at)
+-- posts (id, user_id, text, created_at)
+-- comments (id, post_id, user_id, text, created_at)
+-- likes (user_id, post_id)
+--
+-- Требования:
+-- Один пользователь может писать посты и комментировать.
+-- Один пользователь может лайкать один пост только один раз.
+-- При удалении пользователя — удалить все его посты, комментарии и лайки.
+
+create table users
+(
+    id         bigserial primary key,
+    name       varchar not null,
+    email      varchar not null unique,
+    created_at timestamp default now()
+);
+
+create table posts
+(
+    id         bigserial primary key,
+    user_id    bigint references users (id) on delete cascade,
+    text       text,
+    created_at timestamp default now()
+);
+
+create table comments
+(
+    id         bigserial primary key,
+    post_id    bigint references posts (id),
+    user_id    bigint references users (id) on delete cascade,
+    text       text,
+    created_at timestamp default now()
+);
+
+create table likes
+(
+    user_id bigint references users (id) on delete cascade,
+    post_id bigint references posts (id)
+);
