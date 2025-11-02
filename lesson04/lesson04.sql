@@ -177,6 +177,3 @@ select id,
            end salary_plus_bonus
 from employees e
 where position in ('Sales Manager', 'IT Specialist', 'Software Engineer');
--- Дата сдачи ДЗ: 03.11.25 15:30
-
-create schema lesson05;
