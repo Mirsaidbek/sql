@@ -73,5 +73,3 @@ from departments d
 where id in (select department_id
              from employees e
              where e.salary > 5000)
-select *
-from lesson05.customers;
